@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build output (Railway builds this itself)
+dist/
+
+# C reference implementation (not needed to run the web app)
+algorithms/
+
+# Docs
+README.md
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local env
+.env.local
+.env*.local

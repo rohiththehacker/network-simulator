@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base reset ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #0a0e1a;
+  color: #e2e8f0;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbars ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0f1629; }
+::-webkit-scrollbar-thumb { background: #1e2d45; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2a3f5f; }
+
+/* ── React Flow overrides ───────────────────────────────────── */
+.react-flow__background { background-color: #0a0e1a !important; }
+.react-flow__background pattern circle { fill: #1e2d45 !important; }
+.react-flow__controls button {
+  background: #111827 !important;
+  border-color: #1e2d45 !important;
+  color: #94a3b8 !important;
+}
+.react-flow__controls button:hover {
+  background: #1a2235 !important;
+  color: #e2e8f0 !important;
+}
+.react-flow__minimap {
+  background: #0f1629 !important;
+  border: 1px solid #1e2d45 !important;
+  border-radius: 8px;
+}
+.react-flow__minimap-mask { fill: rgba(10, 14, 26, 0.7) !important; }
+
+/* ── Glass card ─────────────────────────────────────────────── */
+@layer components {
+  .glass-card {
+    @apply bg-bg-card border border-border rounded-xl shadow-card;
+    backdrop-filter: blur(12px);
+  }
+
+  .glass-elevated {
+    @apply bg-bg-elevated border border-border-bright rounded-xl shadow-card;
+  }
+
+  /* Status badges */
+  .badge-online       { @apply bg-green-500/10 text-green-400 border border-green-500/20; }
+  .badge-offline      { @apply bg-red-500/10 text-red-400 border border-red-500/20; }
+  .badge-transmitting { @apply bg-amber-500/10 text-amber-400 border border-amber-500/20; }
+  .badge-error        { @apply bg-red-500/10 text-red-500 border border-red-500/20; }
+
+  /* Log level colours */
+  .log-info    { @apply text-blue-400; }
+  .log-success { @apply text-green-400; }
+  .log-warning { @apply text-amber-400; }
+  .log-error   { @apply text-red-400; }
+
+  /* Input fields */
+  .input-field {
+    @apply w-full bg-bg-secondary border border-border rounded-lg px-3 py-2
+           text-sm text-slate-200 placeholder-slate-500
+           focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/30
+           transition-colors;
+  }
+
+  .select-field {
+    @apply input-field appearance-none cursor-pointer;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply px-4 py-2 bg-accent-blue text-white text-sm font-medium rounded-lg
+           hover:bg-blue-400 active:scale-95 transition-all duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-bg-elevated border border-border text-slate-300 text-sm font-medium rounded-lg
+           hover:border-border-bright hover:text-white active:scale-95 transition-all duration-150;
+  }
+
+  .btn-danger {
+    @apply px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-medium rounded-lg
+           hover:bg-red-500/20 active:scale-95 transition-all duration-150;
+  }
+
+  .btn-success {
+    @apply px-4 py-2 bg-green-500/10 border border-green-500/30 text-green-400 text-sm font-medium rounded-lg
+           hover:bg-green-500/20 active:scale-95 transition-all duration-150;
+  }
+
+  .btn-icon {
+    @apply p-2 rounded-lg bg-bg-elevated border border-border text-slate-400
+           hover:text-white hover:border-border-bright transition-all duration-150 active:scale-95;
+  }
+}
+
+/* ── Packet animation dot ───────────────────────────────────── */
+.packet-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.8), 0 0 24px rgba(245, 158, 11, 0.4);
+  position: absolute;
+  pointer-events: none;
+  z-index: 50;
+  transform: translate(-50%, -50%);
+}
+
+/* ── Stack item animation ───────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-stack-push { animation: stackPush 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+  .animate-stack-pop  { animation: stackPop  0.3s ease-in forwards; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-stack-push, .animate-stack-pop { animation: none !important; }
+}
+
+/* ── Glow pulse for transmitting nodes ──────────────────────── */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(245, 158, 11, 0.3); }
+  50%       { box-shadow: 0 0 20px rgba(245, 158, 11, 0.7), 0 0 40px rgba(245, 158, 11, 0.3); }
+}
+
+.transmitting-glow {
+  animation: glow-pulse 1.2s ease-in-out infinite;
+}
+
+/* ── Edge animation ─────────────────────────────────────────── */
+.edge-active {
+  stroke-dasharray: 8 4;
+  animation: dash 0.8s linear infinite;
+}
+@keyframes dash {
+  to { stroke-dashoffset: -12; }
+}
