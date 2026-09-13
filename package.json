@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "vite preview --port ${PORT:-3000} --host"
+    "start": "serve -s dist"
   },
   "engines": {
     "node": ">=18"
@@ -17,7 +17,8 @@
     "lucide-react": "^0.441.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "reactflow": "^11.11.4"
+    "reactflow": "^11.11.4",
+    "serve": "^14.2.6"
   },
   "devDependencies": {
     "@types/react": "^18.3.5",
