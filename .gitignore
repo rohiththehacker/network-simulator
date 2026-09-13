@@ -4,8 +4,8 @@ node_modules/
 # Build output (Railway builds this itself)
 dist/
 
-# C reference implementation (not needed to run the web app)
-algorithms/
+# C reference implementation — /algorithms/ (root only, NOT src/algorithms/)
+/algorithms/
 
 # Docs
 README.md
