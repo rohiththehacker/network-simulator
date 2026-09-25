@@ -56,14 +56,24 @@ export default function App() {
   const activePath = simResult?.path ?? [];
   const currentHop = (() => {
     if (!simResult || opIndex < 0) return null;
-    // Walk ops up to opIndex and compute which node is currently on top of stack
-    const stack: string[] = [];
-    for (let i = 0; i <= opIndex; i++) {
-      const op = simResult.stackOps[i];
-      if (op.type === 'PUSH') stack.push(op.node);
-      else stack.pop();
+    const isBFS = simResult.algorithm === 'BFS';
+    if (isBFS) {
+      const queue: string[] = [];
+      for (let i = 0; i <= opIndex; i++) {
+        const op = simResult.stackOps[i];
+        if (op.type === 'ENQUEUE' || op.type === 'PUSH') queue.push(op.node);
+        else if (op.type === 'DEQUEUE' || op.type === 'POP') queue.shift();
+      }
+      return queue[0] ?? null;
+    } else {
+      const stack: string[] = [];
+      for (let i = 0; i <= opIndex; i++) {
+        const op = simResult.stackOps[i];
+        if (op.type === 'PUSH' || op.type === 'ENQUEUE') stack.push(op.node);
+        else if (op.type === 'POP' || op.type === 'DEQUEUE') stack.pop();
+      }
+      return stack[stack.length - 1] ?? null;
     }
-    return stack[stack.length - 1] ?? null;
   })();
 
   // Derive src/dst for algorithm panel from most recent sim or first/last node
@@ -94,7 +104,7 @@ export default function App() {
               Computer Network Simulator
             </h1>
             <p className="text-[10px] text-slate-500 font-mono">
-              Graph · Stack · DFS · BFS · Dijkstra
+              Graph · Stack (LIFO) · Queue (FIFO) · DFS · BFS
             </p>
           </div>
         </div>

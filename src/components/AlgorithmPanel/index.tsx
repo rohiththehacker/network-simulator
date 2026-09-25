@@ -1,22 +1,19 @@
 /**
- * AlgorithmPanel — Educational comparison of DFS, BFS, and Dijkstra.
+ * AlgorithmPanel — Educational comparison of DFS (Stack LIFO) and BFS (Queue FIFO).
  *
  * Shows:
- *   - Description of each algorithm
- *   - How it differs from the others
- *   - The path it would find on the current simulation result
+ *   - Description of each algorithm & underlying Data Structure
+ *   - How DFS differs from BFS
+ *   - The path found on current simulation
  *   - Step-by-step visited order
- *
- * This panel is designed for academic project demonstrations.
  */
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, GitBranch, Layers, Zap } from 'lucide-react';
+import { BookOpen, GitBranch, ListFilter } from 'lucide-react';
 import { Graph } from '../../ds/Graph';
 import { dfs } from '../../algorithms/dfs';
 import { bfs } from '../../algorithms/bfs';
-import { dijkstra } from '../../algorithms/dijkstra';
 import { Algorithm } from '../../types';
 import { formatLatency } from '../../utils/deviceUtils';
 
@@ -33,42 +30,31 @@ const ALGO_INFO = {
     color: 'text-purple-400',
     bg: 'bg-purple-500/10',
     border: 'border-purple-500/30',
-    description: 'Explores as far as possible along each branch before backtracking. Uses a STACK internally (LIFO). Does NOT guarantee the shortest path.',
-    complexity: { time: 'O(V + E)', space: 'O(V)', best: 'Low memory', worst: 'Long path' },
+    description: 'Explores as far as possible along each branch before backtracking. Uses a STACK internally (LIFO - Last In, First Out). Finds a valid path (not necessarily shortest).',
+    complexity: { time: 'O(V + E)', space: 'O(V)', memory: 'Low (stack depth)', path: 'First path found' },
     structure: 'Stack (LIFO)',
   },
   BFS: {
     name: 'Breadth-First Search',
-    icon: Layers,
+    icon: ListFilter,
     color: 'text-blue-400',
     bg: 'bg-blue-500/10',
     border: 'border-blue-500/30',
-    description: 'Explores all neighbours at the current depth before going deeper. Uses a QUEUE internally (FIFO). Guarantees the shortest path by hop count.',
-    complexity: { time: 'O(V + E)', space: 'O(V)', best: 'Shortest hops', worst: 'More memory' },
+    description: 'Explores all neighbours at the current depth before going deeper. Uses a QUEUE internally (FIFO - First In, First Out). Guarantees the shortest path by hop count.',
+    complexity: { time: 'O(V + E)', space: 'O(V)', memory: 'Frontier nodes', path: 'Fewest hops guaranteed' },
     structure: 'Queue (FIFO)',
-  },
-  Dijkstra: {
-    name: "Dijkstra's Algorithm",
-    icon: Zap,
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/30',
-    description: 'Finds the lowest-cost path using edge weights (latency). Uses a Priority Queue. Guarantees the minimum-latency path in a weighted graph.',
-    complexity: { time: 'O(V² log V)', space: 'O(V)', best: 'Min latency', worst: 'Slower' },
-    structure: 'Priority Queue',
   },
 } as const;
 
 export default function AlgorithmPanel({ graph, srcId, dstId }: AlgorithmPanelProps) {
   const [expanded, setExpanded] = useState<Algorithm | null>(null);
 
-  const hasRoute = srcId && dstId;
+  const hasRoute = Boolean(srcId && dstId);
 
-  // Run all three algorithms for comparison
+  // Run DFS and BFS algorithms for comparison
   const results = hasRoute ? {
-    DFS:      dfs(graph, srcId, dstId),
-    BFS:      bfs(graph, srcId, dstId),
-    Dijkstra: dijkstra(graph, srcId, dstId),
+    DFS: dfs(graph, srcId, dstId),
+    BFS: bfs(graph, srcId, dstId),
   } : null;
 
   const algorithms = Object.keys(ALGO_INFO) as Algorithm[];
@@ -102,7 +88,7 @@ export default function AlgorithmPanel({ graph, srcId, dstId }: AlgorithmPanelPr
                 onClick={() => setExpanded(isExpanded ? null : algo)}
                 className={`w-full flex items-center gap-3 p-3 text-left ${info.bg} hover:opacity-90 transition-opacity`}
               >
-                <div className={`p-1.5 rounded-lg bg-black/20`}>
+                <div className="p-1.5 rounded-lg bg-black/20">
                   <Icon size={15} className={info.color} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -211,22 +197,18 @@ export default function AlgorithmPanel({ graph, srcId, dstId }: AlgorithmPanelPr
           );
         })}
 
-        {/* Comparison summary when all results are available */}
-        {results && results.DFS.found && results.BFS.found && results.Dijkstra.found && (
+        {/* Comparison summary when both DFS and BFS results are available */}
+        {results && results.DFS.found && results.BFS.found && (
           <div className="p-3 bg-bg-secondary rounded-xl border border-border space-y-2">
-            <div className="text-[10px] text-slate-400 uppercase tracking-wide font-medium">Summary</div>
+            <div className="text-[10px] text-slate-400 uppercase tracking-wide font-medium">DFS vs BFS Summary</div>
             <div className="space-y-1 text-xs font-mono">
               <div className="flex justify-between">
-                <span className="text-slate-500">Fewest hops</span>
-                <span className="text-blue-400">BFS ({results.BFS.hops})</span>
+                <span className="text-slate-500">BFS (Queue / FIFO)</span>
+                <span className="text-blue-400">{results.BFS.hops} hop(s) [Shortest]</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Lowest latency</span>
-                <span className="text-amber-400">Dijkstra ({formatLatency(results.Dijkstra.totalLatency)})</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">DFS path</span>
-                <span className="text-purple-400">{results.DFS.hops} hop(s), {formatLatency(results.DFS.totalLatency)}</span>
+                <span className="text-slate-500">DFS (Stack / LIFO)</span>
+                <span className="text-purple-400">{results.DFS.hops} hop(s) [Exploration]</span>
               </div>
             </div>
           </div>

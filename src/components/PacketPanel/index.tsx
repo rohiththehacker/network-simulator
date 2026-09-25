@@ -3,7 +3,7 @@
  *
  * Allows the user to:
  *   1. Choose source and destination devices
- *   2. Choose routing algorithm (DFS / BFS / Dijkstra)
+ *   2. Choose routing algorithm (DFS / BFS)
  *   3. Transmit the packet
  *   4. See the computed path and hop-by-hop status
  *   5. Step through the simulation manually
@@ -25,12 +25,11 @@ interface PacketPanelProps {
   onStepChange: (result: SimulationResult | null, opIdx: number) => void;
 }
 
-const ALGORITHMS: Algorithm[] = ['DFS', 'BFS', 'Dijkstra'];
+const ALGORITHMS: Algorithm[] = ['DFS', 'BFS'];
 
 const ALGO_DESCRIPTIONS: Record<Algorithm, string> = {
-  DFS: 'Depth-First Search — explores deeply, finds A path (not necessarily shortest)',
-  BFS: 'Breadth-First Search — explores level-by-level, guaranteed shortest hops',
-  Dijkstra: 'Dijkstra\'s Algorithm — finds the lowest-latency path using edge weights',
+  DFS: 'Depth-First Search — uses STACK (LIFO: Last-In First-Out)',
+  BFS: 'Breadth-First Search — uses QUEUE (FIFO: First-In First-Out, shortest hops)',
 };
 
 export default function PacketPanel({ nodes, onSimulate, onStepChange }: PacketPanelProps) {
@@ -151,7 +150,7 @@ export default function PacketPanel({ nodes, onSimulate, onStepChange }: PacketP
         {/* Algorithm */}
         <div>
           <label className="block text-xs text-slate-400 mb-1.5">Routing Algorithm</label>
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="grid grid-cols-2 gap-1.5">
             {ALGORITHMS.map(a => (
               <button
                 key={a}

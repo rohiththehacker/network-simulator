@@ -1,11 +1,12 @@
 // Re-export core data structure types
 export type { EdgeData, GraphNode, DeviceType, DeviceStatus, Edge } from '../ds/Graph';
 export type { StackOperation } from '../ds/Stack';
+export type { QueueOperation } from '../ds/Queue';
 export type { PathResult } from '../algorithms/dfs';
 
 // ── Simulation ──────────────────────────────────────────────
 
-export type Algorithm = 'DFS' | 'BFS' | 'Dijkstra';
+export type Algorithm = 'DFS' | 'BFS';
 export type PacketStatus = 'idle' | 'routing' | 'transmitting' | 'delivered' | 'failed';
 
 export interface SimulationResult {
@@ -17,7 +18,7 @@ export interface SimulationResult {
   visitedOrder: string[];   // nodes visited during path search
   hops: number;
   totalLatency: number;     // ms
-  stackOps: Array<{ type: 'PUSH' | 'POP'; node: string }>;
+  stackOps: Array<{ type: 'PUSH' | 'POP' | 'ENQUEUE' | 'DEQUEUE'; node: string }>;
   status: 'DELIVERED' | 'FAILED';
   reason?: string;          // error reason when failed
   timestamp: number;

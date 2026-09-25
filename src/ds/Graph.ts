@@ -15,7 +15,7 @@
  *
  * An edge stores:
  *   - bandwidth (Mbps) — capacity of the link
- *   - latency  (ms)   — delay on the link (used by Dijkstra)
+ *   - latency  (ms)   — delay on the link
  * ============================================================
  */
 

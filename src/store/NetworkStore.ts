@@ -8,9 +8,9 @@
 
 import { Graph, GraphNode, Edge } from '../ds/Graph';
 import { Stack } from '../ds/Stack';
+import { Queue } from '../ds/Queue';
 import { dfs } from '../algorithms/dfs';
 import { bfs } from '../algorithms/bfs';
-import { dijkstra } from '../algorithms/dijkstra';
 import {
   Algorithm,
   SimulationResult,
@@ -52,7 +52,8 @@ export const DEMO_NETWORK = {
 
 export class NetworkStore {
   graph: Graph = new Graph();
-  packetStack: Stack<string> = new Stack<string>(); // holds node IDs
+  packetStack: Stack<string> = new Stack<string>(); // holds node IDs for DFS (LIFO)
+  packetQueue: Queue<string> = new Queue<string>(); // holds node IDs for BFS (FIFO)
   packets: SimulationResult[] = [];
   logs: LogEntry[] = [];
   private _packetCounter = 1;
@@ -73,6 +74,7 @@ export class NetworkStore {
   reset(): void {
     this.graph = new Graph();
     this.packetStack.clear();
+    this.packetQueue.clear();
     this.packets = [];
     this.logs = [];
     this._packetCounter = 1;
@@ -155,11 +157,10 @@ export class NetworkStore {
       return this._fail(packetId, sourceId, destId, algorithm, 'Source and destination cannot be the same');
     }
 
-    // Run the selected algorithm
-    let result;
-    if (algorithm === 'DFS')      result = dfs(this.graph, sourceId, destId);
-    else if (algorithm === 'BFS') result = bfs(this.graph, sourceId, destId);
-    else                          result = dijkstra(this.graph, sourceId, destId);
+    // Run the selected algorithm (DFS or BFS)
+    const result = algorithm === 'DFS'
+      ? dfs(this.graph, sourceId, destId)
+      : bfs(this.graph, sourceId, destId);
 
     if (!result.found || result.path.length === 0) {
       const offlineNodes = this.graph.getAllNodes()
@@ -170,23 +171,40 @@ export class NetworkStore {
       return this._fail(packetId, sourceId, destId, algorithm, `No route available from "${src.label}" to "${dst.label}"${hint}`);
     }
 
-    // Build stack operations — PUSH phase (packet travelling forward)
     const stackOps: SimulationResult['stackOps'] = [];
-    this.packetStack.clear();
 
-    result.path.forEach(nodeId => {
-      this.packetStack.push(nodeId);
-      stackOps.push({ type: 'PUSH', node: nodeId });
-      const label = this.graph.getNode(nodeId)?.label ?? nodeId;
-      this.log('INFO', `PUSH → ${label}`);
-    });
+    if (algorithm === 'DFS') {
+      // DFS uses STACK (LIFO)
+      this.packetStack.clear();
+      result.path.forEach(nodeId => {
+        this.packetStack.push(nodeId);
+        stackOps.push({ type: 'PUSH', node: nodeId });
+        const label = this.graph.getNode(nodeId)?.label ?? nodeId;
+        this.log('INFO', `PUSH → ${label} [Stack LIFO]`);
+      });
 
-    // POP phase (packet received at destination, unwind stack)
-    while (!this.packetStack.isEmpty()) {
-      const nodeId = this.packetStack.pop()!;
-      stackOps.push({ type: 'POP', node: nodeId });
-      const label = this.graph.getNode(nodeId)?.label ?? nodeId;
-      this.log('INFO', `POP  ← ${label}`);
+      while (!this.packetStack.isEmpty()) {
+        const nodeId = this.packetStack.pop()!;
+        stackOps.push({ type: 'POP', node: nodeId });
+        const label = this.graph.getNode(nodeId)?.label ?? nodeId;
+        this.log('INFO', `POP  ← ${label} [Stack LIFO]`);
+      }
+    } else {
+      // BFS uses QUEUE (FIFO)
+      this.packetQueue.clear();
+      result.path.forEach(nodeId => {
+        this.packetQueue.enqueue(nodeId);
+        stackOps.push({ type: 'ENQUEUE', node: nodeId });
+        const label = this.graph.getNode(nodeId)?.label ?? nodeId;
+        this.log('INFO', `ENQUEUE → ${label} [Queue FIFO]`);
+      });
+
+      while (!this.packetQueue.isEmpty()) {
+        const nodeId = this.packetQueue.dequeue()!;
+        stackOps.push({ type: 'DEQUEUE', node: nodeId });
+        const label = this.graph.getNode(nodeId)?.label ?? nodeId;
+        this.log('INFO', `DEQUEUE ← ${label} [Queue FIFO]`);
+      }
     }
 
     const sim: SimulationResult = {
